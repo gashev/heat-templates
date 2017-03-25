@@ -1,0 +1,44 @@
+heat_template_version: 2013-05-23
+
+parameters:
+  network_id:
+    type: string
+    label: Network ID
+  image_id:
+    type: string
+    label: Glance Image ID
+  flavor:
+    type: string
+    label: Flavor
+  key_name:
+    type: string
+    label: Key Name
+  count:
+    type: number
+    default: 3
+
+resources:
+  ansible:
+    type: OS::Nova::Server
+    depends_on: resource_group
+    properties:
+      image: { get_param: image_id }
+      flavor: { get_param: flavor }
+      key_name: { get_param: key_name }
+      metadata: {"ip_list": {get_attr: [resource_group, ip_list]}}
+      networks:
+        - network: { get_param: network_id }
+      config_drive: True
+      user_data_format: RAW
+      user_data: { get_file: 'user-data' }
+  resource_group:
+    type: OS::Heat::ResourceGroup
+    properties:
+      count: { get_param: count }
+      resource_def:
+        type: resource_group.yaml
+        properties:
+          network_id: { get_param: network_id }
+          image_id: { get_param: image_id }
+          flavor: { get_param: flavor }
+          key_name: { get_param: key_name }
