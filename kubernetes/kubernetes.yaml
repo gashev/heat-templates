@@ -35,11 +35,18 @@ resources:
           template: { get_file: user-data }
           params:
             $ssh_key: { get_attr: [generated_key_pair, public_key] }
+  install_ansible:
+    type: OS::Heat::SoftwareConfig
+    properties:
+      group: ungrouped
+      config: { get_file: install_ansible }
+
   master_init:
     type: OS::Heat::MultipartMime
     properties:
       parts:
         - config: {get_resource: cloud_user }
+        - config: {get_resource: install_ansible }
   master_port:
     type: OS::Neutron::Port
     properties:
