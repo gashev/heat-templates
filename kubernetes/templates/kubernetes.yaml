@@ -40,13 +40,26 @@ resources:
     properties:
       group: ungrouped
       config: { get_file: install_ansible }
-
+  configure_ansible_hosts:
+    type: OS::Heat::SoftwareConfig
+    properties:
+      group: ungrouped
+      config:
+        str_replace:
+          template: { get_file: configure_ansible_hosts }
+          params:
+            $master_ip: { get_attr: [master_port, fixed_ips, 0, ip_address] } 
+            $nodes_ip_list:
+              list_join:
+                - ','
+                - {get_attr: [resource_group, ip_list]}
   master_init:
     type: OS::Heat::MultipartMime
     properties:
       parts:
         - config: {get_resource: cloud_user }
         - config: {get_resource: install_ansible }
+        - config: {get_resource: configure_ansible_hosts }
   master_port:
     type: OS::Neutron::Port
     properties:
@@ -54,6 +67,7 @@ resources:
       network_id: { get_param: network_id }
   master:
     type: OS::Nova::Server
+    depends_on: resource_group
     properties:
       image: { get_param: image_id }
       flavor: { get_param: flavor }
