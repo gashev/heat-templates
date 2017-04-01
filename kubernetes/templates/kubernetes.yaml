@@ -26,6 +26,7 @@ resources:
     properties:
       name: kubernetes_cloud_user_key
       save_private_key: True
+
   cloud_user:
     type: OS::Heat::SoftwareConfig
     properties:
@@ -35,11 +36,13 @@ resources:
           template: { get_file: user-data }
           params:
             $ssh_key: { get_attr: [generated_key_pair, public_key] }
+
   install_ansible:
     type: OS::Heat::SoftwareConfig
     properties:
       group: ungrouped
       config: { get_file: install_ansible }
+
   configure_ansible_hosts:
     type: OS::Heat::SoftwareConfig
     properties:
@@ -53,6 +56,7 @@ resources:
               list_join:
                 - ','
                 - {get_attr: [resource_group, ip_list]}
+
   master_init:
     type: OS::Heat::MultipartMime
     properties:
@@ -60,11 +64,13 @@ resources:
         - config: {get_resource: cloud_user }
         - config: {get_resource: install_ansible }
         - config: {get_resource: configure_ansible_hosts }
+
   master_port:
     type: OS::Neutron::Port
     properties:
       admin_state_up: true
       network_id: { get_param: network_id }
+
   master:
     type: OS::Nova::Server
     depends_on: resource_group
@@ -77,6 +83,7 @@ resources:
       config_drive: True
       user_data_format: RAW
       user_data: { get_resource: master_init }
+
   resource_group:
     type: OS::Heat::ResourceGroup
     properties:
