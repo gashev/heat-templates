@@ -2,7 +2,7 @@
 .PHONY: delete
 
 create:
-	openstack stack create -t kubernetes.yaml -e env.yaml kubernetes
+	openstack stack create -t templates/kubernetes.yaml -e env.yaml kubernetes
 	openstack stack output show --format value kubernetes --all|jq '.output_value'|xargs echo -e >private_key
 	chmod 0400 private_key
 
