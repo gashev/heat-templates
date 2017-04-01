@@ -1,0 +1,75 @@
+heat_template_version: 2013-05-23
+
+parameters:
+  network_id:
+    type: string
+    label: Network ID
+  image_id:
+    type: string
+    label: Glance Image ID
+  flavor:
+    type: string
+    label: Flavor
+  key_name:
+    type: string
+    label: Key Name
+    constraints:
+      - custom_constraint: nova.keypair
+  count:
+    type: number
+    default: 3
+
+resources:
+  generated_key_pair:
+    # http://docs.openstack.org/developer/heat/template_guide/openstack.html#OS::Nova::KeyPair
+    type: OS::Nova::KeyPair
+    properties:
+      name: kubernetes_cloud_user_key
+      save_private_key: True
+  cloud_user:
+    type: OS::Heat::SoftwareConfig
+    properties:
+      group: ungrouped
+      config:
+        str_replace:
+          template: { get_file: user-data }
+          params:
+            $ssh_key: { get_attr: [generated_key_pair, public_key] }
+  master_init:
+    type: OS::Heat::MultipartMime
+    properties:
+      parts:
+        - config: {get_resource: cloud_user }
+  master_port:
+    type: OS::Neutron::Port
+    properties:
+      admin_state_up: true
+      network_id: { get_param: network_id }
+  master:
+    type: OS::Nova::Server
+    properties:
+      image: { get_param: image_id }
+      flavor: { get_param: flavor }
+      key_name: { get_param: key_name }
+      networks:
+        - port: { get_resource: master_port }
+      config_drive: True
+      user_data_format: RAW
+      user_data: { get_resource: master_init }
+  resource_group:
+    type: OS::Heat::ResourceGroup
+    properties:
+      count: { get_param: count }
+      resource_def:
+        type: resource_group.yaml
+        properties:
+          network_id: { get_param: network_id }
+          image_id: { get_param: image_id }
+          flavor: { get_param: flavor }
+          key_name: { get_param: key_name }
+
+outputs:
+  private_key:
+    description: Private key
+    value: { get_attr: [ generated_key_pair, private_key ] }
+

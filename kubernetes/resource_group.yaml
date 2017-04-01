@@ -1,0 +1,38 @@
+heat_template_version: 2013-05-23
+
+parameters:
+  network_id:
+    type: string
+    label: Network ID
+  image_id:
+    type: string
+    label: Glance Image ID
+  flavor:
+    type: string
+    label: Flavor
+  key_name:
+    type: string
+    label: Key Name
+
+resources:
+  port:
+    type: OS::Neutron::Port
+    properties:
+      admin_state_up: true
+      network_id: { get_param: network_id }
+  instance:
+    type: OS::Nova::Server
+    properties:
+      image: { get_param: image_id }
+      flavor: { get_param: flavor }
+      key_name: { get_param: key_name }
+      networks:
+        - port: { get_resource: port }
+      config_drive: True
+      user_data_format: RAW
+      user_data: { get_file: 'user-data' }
+
+outputs:
+  ip_list:
+    description: The IP addresses of the deployed instance
+    value: { get_attr: [port, fixed_ips, 0, ip_address] }
