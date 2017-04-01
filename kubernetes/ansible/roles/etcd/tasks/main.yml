@@ -1,0 +1,6 @@
+---
+- name: Install etcd package
+  yum: name={{ item }} state=present
+  with_items:
+   - etcd
+

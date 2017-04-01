@@ -1,0 +1,10 @@
+---
+- name: Masters installation
+  hosts: masters
+  remote_user: cloud
+  become: yes
+  become_method: sudo
+
+  roles:
+    - etcd
+
