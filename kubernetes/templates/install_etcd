@@ -1,0 +1,6 @@
+#!/bin/bash
+
+yum install -y etcd
+sed -i 's/ETCD_LISTEN_CLIENT_URLS=.*/ETCD_LISTEN_CLIENT_URLS="http:\/\/0.0.0.0:2379"/' /etc/etcd/etcd.conf
+systemctl start etcd
+systemctl enable etcd
