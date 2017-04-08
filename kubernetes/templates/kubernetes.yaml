@@ -43,6 +43,12 @@ resources:
       group: ungrouped
       config: { get_file: install_ansible }
 
+  install_etcd:
+    type: OS::Heat::SoftwareConfig
+    properties:
+      group: ungrouped
+      config: { get_file: install_etcd }
+
   configure_ansible_hosts:
     type: OS::Heat::SoftwareConfig
     properties:
@@ -51,19 +57,31 @@ resources:
         str_replace:
           template: { get_file: configure_ansible_hosts }
           params:
-            $master_ip: { get_attr: [master_port, fixed_ips, 0, ip_address] } 
+            $master_ip: { get_attr: [master_port, fixed_ips, 0, ip_address] }
             $nodes_ip_list:
               list_join:
                 - ','
                 - {get_attr: [resource_group, ip_list]}
+
+  configure_master_private_key:
+    type: OS::Heat::SoftwareConfig
+    properties:
+      group: ungrouped
+      config: |
+        #!/bin/bash
+        su - cloud -c 'ssh-keygen -q -t rsa -N "" -f /home/cloud/.ssh/id_rsa'
+      outputs:
+        - name: result
 
   master_init:
     type: OS::Heat::MultipartMime
     properties:
       parts:
         - config: {get_resource: cloud_user }
+        - config: {get_resource: install_etcd }
         - config: {get_resource: install_ansible }
         - config: {get_resource: configure_ansible_hosts }
+        - config: {get_resource: configure_master_private_key }
 
   master_port:
     type: OS::Neutron::Port
@@ -73,7 +91,6 @@ resources:
 
   master:
     type: OS::Nova::Server
-    depends_on: resource_group
     properties:
       image: { get_param: image_id }
       flavor: { get_param: flavor }
@@ -81,7 +98,7 @@ resources:
       networks:
         - port: { get_resource: master_port }
       config_drive: True
-      user_data_format: RAW
+      user_data_format: SOFTWARE_CONFIG
       user_data: { get_resource: master_init }
 
   resource_group:
