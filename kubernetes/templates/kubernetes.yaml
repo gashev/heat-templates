@@ -49,20 +49,6 @@ resources:
       group: ungrouped
       config: { get_file: install_etcd }
 
-  configure_ansible_hosts:
-    type: OS::Heat::SoftwareConfig
-    properties:
-      group: ungrouped
-      config:
-        str_replace:
-          template: { get_file: configure_ansible_hosts }
-          params:
-            $master_ip: { get_attr: [master_port, fixed_ips, 0, ip_address] }
-            $nodes_ip_list:
-              list_join:
-                - ','
-                - {get_attr: [resource_group, ip_list]}
-
   configure_master_private_key:
     type: OS::Heat::SoftwareConfig
     properties:
@@ -80,7 +66,6 @@ resources:
         - config: {get_resource: cloud_user }
         - config: {get_resource: install_etcd }
         - config: {get_resource: install_ansible }
-        - config: {get_resource: configure_ansible_hosts }
         - config: {get_resource: configure_master_private_key }
 
   master_port:
