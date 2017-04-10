@@ -1,0 +1,18 @@
+#!/usr/bin/python
+
+import etcd
+
+client = etcd.Client(host='127.0.0.1', port=2379)
+
+items = {}
+data = client.read('/ansible')
+for result in data.children:
+        if result.dir:
+                key = result.key.replace('/ansible/', '')
+                items[key] = {'hosts': []}
+                tmp = client.read(result.key)
+                for item in tmp.children:
+                        items[key]['hosts'].append(item.value)
+
+print items
+
