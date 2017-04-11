@@ -13,8 +13,32 @@ parameters:
   key_name:
     type: string
     label: Key Name
+  key:
+    type: string
+    label: Key Name
+  ansible_key:
+    type: string
+    label: Key Name
+
 
 resources:
+  node_cloud_user:
+    type: OS::Heat::SoftwareConfig
+    properties:
+      group: ungrouped
+      config:
+        str_replace:
+          template: { get_file: 'user-data' }
+          params:
+            $ssh_key_1: { get_param: key }
+            $ssh_key_2: { get_param: ansible_key }
+  
+  node_init:
+    type: OS::Heat::MultipartMime
+    properties:
+      parts:
+        - config: {get_resource: node_cloud_user }
+
   port:
     type: OS::Neutron::Port
     properties:
@@ -30,7 +54,7 @@ resources:
         - port: { get_resource: port }
       config_drive: True
       user_data_format: RAW
-      user_data: { get_file: 'user-data' }
+      user_data: { get_resource: node_init }
 
 outputs:
   ip_list:

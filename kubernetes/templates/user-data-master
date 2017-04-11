@@ -4,8 +4,7 @@ users:
   - default
   - name: cloud
     ssh-authorized-keys:
-      - $ssh_key_1
-      - $ssh_key_2
+      - $ssh_key
     sudo: ['ALL=(ALL) NOPASSWD:ALL']
     shell: /bin/bash
 
