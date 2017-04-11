@@ -41,7 +41,11 @@ resources:
     type: OS::Heat::SoftwareConfig
     properties:
       group: ungrouped
-      config: { get_file: install_ansible }
+      config:
+        str_replace:
+          template: { get_file: install_ansible }
+          params:
+            $ip: { get_attr: [master_port, fixed_ips, 0, ip_address] }
 
   install_etcd:
     type: OS::Heat::SoftwareConfig
@@ -85,6 +89,7 @@ resources:
       config_drive: True
       user_data_format: SOFTWARE_CONFIG
       user_data: { get_resource: master_init }
+      personality: { "/etc/ansible/hosts": { get_file: "hosts" } }
 
   resource_group:
     type: OS::Heat::ResourceGroup
