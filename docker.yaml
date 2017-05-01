@@ -18,8 +18,51 @@ parameters:
     default: 3
 
 resources:
+  wait_condition:
+    type: OS::Heat::WaitCondition
+    properties:
+      handle: {get_resource: wait_handle}
+      count: 1
+      timeout: 300
+
+  wait_handle:
+    type: OS::Heat::WaitConditionHandle
+
+  manager:
+    type: OS::Nova::Server
+    properties:
+      image: { get_param: image_id }
+      flavor: { get_param: flavor }
+      key_name: { get_param: key_name }
+      networks:
+        - network: { get_param: network_id }
+      name: manager
+      config_drive: True
+      user_data_format: RAW
+      user_data:
+        str_replace:
+          template: |
+            #!/bin/bash
+            yum clean all
+            yum update -y
+            yum install -y ntp
+            ntpdate 0.centos.pool.ntp.org
+            systemctl start ntpd
+            systemctl enable ntpd
+            yum install -y yum-utils
+            yum-config-manager --add-repo https://download.docker.com/linux/centos/docker-ce.repo
+            yum install -y docker-ce
+            systemctl start docker
+            systemctl enable docker
+            docker swarm init
+            token=$(docker swarm join-token -q worker)
+            wc_notify --data-binary "{\"status\": \"SUCCESS\", \"data\": \"${token}\"}"
+          params:
+            wc_notify: { get_attr: [wait_handle, curl_cli] }
+
   resource_group:
     type: OS::Heat::ResourceGroup
+    depends_on: wait_condition
     properties:
       count: { get_param: count }
       index_var: "%id%"
@@ -49,4 +92,6 @@ resources:
               - systemctl start docker
               - systemctl enable docker
 
-
+outputs:
+  token:
+    value: { 'Fn::Select': ['1', { get_attr: [wait_condition, data] }] }
