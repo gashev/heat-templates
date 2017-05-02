@@ -28,6 +28,12 @@ resources:
   wait_handle:
     type: OS::Heat::WaitConditionHandle
 
+  port:
+    type: OS::Neutron::Port
+    properties:
+      admin_state_up: true
+      network_id: { get_param: network_id }
+
   manager:
     type: OS::Nova::Server
     properties:
@@ -35,7 +41,7 @@ resources:
       flavor: { get_param: flavor }
       key_name: { get_param: key_name }
       networks:
-        - network: { get_param: network_id }
+        - port: { get_resource: port }
       name: manager
       config_drive: True
       user_data_format: RAW
@@ -77,21 +83,22 @@ resources:
           name: instance-%id%
           config_drive: True
           user_data_format: RAW
-          user_data: |
-            #cloud-config
-            runcmd:
-              - yum clean all
-              - yum update -y
-              - yum install -y ntp
-              - ntpdate 0.centos.pool.ntp.org
-              - systemctl start ntpd
-              - systemctl enable ntpd
-              - yum install -y yum-utils
-              - yum-config-manager --add-repo https://download.docker.com/linux/centos/docker-ce.repo
-              - yum install -y docker-ce
-              - systemctl start docker
-              - systemctl enable docker
-
-outputs:
-  token:
-    value: { 'Fn::Select': ['1', { get_attr: [wait_condition, data] }] }
+          user_data:
+            str_replace:
+              template: |
+                #!/bin/bash
+                yum clean all
+                yum update -y
+                yum install -y ntp
+                ntpdate 0.centos.pool.ntp.org
+                systemctl start ntpd
+                systemctl enable ntpd
+                yum install -y yum-utils
+                yum-config-manager --add-repo https://download.docker.com/linux/centos/docker-ce.repo
+                yum install -y docker-ce
+                systemctl start docker
+                systemctl enable docker
+                docker swarm join --token worker_token manager_ip:2377
+              params:
+                worker_token: { 'Fn::Select': ['1', { get_attr: [wait_condition, data] }] }
+                manager_ip: { get_attr: [port, fixed_ips, 0, ip_address] }
