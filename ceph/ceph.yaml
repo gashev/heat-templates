@@ -1,0 +1,59 @@
+heat_template_version: 2013-05-23
+
+parameters:
+  network_id:
+    type: string
+    label: Network ID
+  image_id:
+    type: string
+    label: Glance Image ID
+  key_name:
+    type: string
+    label: Key Name
+  count:
+    type: number
+    default: 3
+
+resources:
+  ceph-flavor:
+    type: OS::Nova::Flavor
+    properties:
+      disk: 20
+      ephemeral: 0
+      ram: 2048
+      swap: 0
+      vcpus: 1
+
+  admin-node:
+    type: OS::Nova::Server
+    properties:
+      name: admin-node 
+      image: { get_param: image_id }
+      flavor: { get_resource: ceph-flavor }
+      networks:
+        - network: { get_param: network_id }
+      key_name: { get_param: key_name }
+      config_drive: True
+      user_data_format: RAW
+      user_data: |
+        #!/bin/bash
+        yum clean all
+        yum install -y ntp
+        ntpdate 0.centos.pool.ntp.org
+        systemctl start ntpd
+        systemctl enable ntpd
+        rpm -ivh http://download.ceph.com/rpm-jewel/el7/noarch/ceph-release-1-1.el7.noarch.rpm
+        yum install -y ceph-deploy
+
+  resource_group:
+    type: OS::Heat::ResourceGroup
+    properties:
+      count: { get_param: count }
+      resource_def:
+        type: resource_group.yaml
+        properties:
+          network_id: { get_param: network_id }
+          image_id: { get_param: image_id }
+          flavor: { get_resource: ceph-flavor }
+          key_name: { get_param: key_name }
+
