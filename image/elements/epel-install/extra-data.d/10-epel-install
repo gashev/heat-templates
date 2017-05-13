@@ -1,0 +1,11 @@
+#!/bin/bash
+
+if [ ${DIB_DEBUG_TRACE:-1} -gt 0 ]; then
+    set -x
+fi
+set -eu
+set -o pipefail
+
+if [ "$DISTRO_NAME" == "centos" ] || [ "$DISTRO_NAME" == "centos7" ] ; then
+    sudo chroot $TMP_MOUNT_PATH yum install -y epel-release
+fi
