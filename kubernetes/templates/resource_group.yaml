@@ -19,7 +19,8 @@ parameters:
   ansible_key:
     type: string
     label: Key Name
-
+  master_ip:
+    type: string
 
 resources:
   node_cloud_user:
@@ -30,6 +31,8 @@ resources:
         str_replace:
           template: { get_file: 'user-data' }
           params:
+            $master_ip: { get_param: master_ip }
+            $ip: { get_attr: [port, fixed_ips, 0, ip_address] }
             $ssh_key_1: { get_param: key }
             $ssh_key_2: { get_param: ansible_key }
   

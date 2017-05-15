@@ -20,6 +20,16 @@ parameters:
     default: 3
 
 resources:
+  wait_condition:
+    type: OS::Heat::WaitCondition
+    properties:
+      handle: {get_resource: wait_handle}
+      count: 1
+      timeout: 300
+
+  wait_handle:
+    type: OS::Heat::WaitConditionHandle
+
   generated_key_pair:
     # http://docs.openstack.org/developer/heat/template_guide/openstack.html#OS::Nova::KeyPair
     type: OS::Nova::KeyPair
@@ -58,7 +68,11 @@ resources:
     type: OS::Heat::SoftwareConfig
     properties:
       group: ungrouped
-      config: { get_file: install_etcd }
+      config:
+        str_replace:
+          template: { get_file: install_etcd }
+          params:
+            wc_notify: { get_attr: [wait_handle, curl_cli] }
 
   master_init:
     type: OS::Heat::MultipartMime
@@ -89,7 +103,7 @@ resources:
 
   resource_group:
     type: OS::Heat::ResourceGroup
-    depends_on: master
+    depends_on: wait_condition
     properties:
       count: { get_param: count }
       resource_def:
@@ -101,6 +115,7 @@ resources:
           key_name: { get_param: key_name }
           key: { get_attr: [generated_key_pair, public_key] }
           ansible_key: { get_attr: [generated_ansible_key_pair, public_key] }
+          master_ip: { get_attr: [master_port, fixed_ips, 0, ip_address] }
 
 outputs:
   private_key:

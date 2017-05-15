@@ -9,3 +9,5 @@ users:
     sudo: ['ALL=(ALL) NOPASSWD:ALL']
     shell: /bin/bash
 
+runcmd:
+  - curl -X PUT http://$master_ip:2379/v2/keys/ansible/nodes/$(hostname) -d value="$ip"

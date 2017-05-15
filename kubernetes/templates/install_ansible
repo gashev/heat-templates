@@ -2,7 +2,7 @@
 
 packages:
   - ansible
-  - python-etcd
+  - python2-python-etcd
   - python-urllib3
   - curl
 
