@@ -52,7 +52,8 @@ resources:
         str_replace:
           template: { get_file: user-data-master }
           params:
-            $ssh_key: { get_attr: [generated_key_pair, public_key] }
+            $ssh_key_1: { get_attr: [generated_key_pair, public_key] }
+            $ssh_key_2: { get_attr: [generated_ansible_key_pair, public_key] }
 
   install_ansible:
     type: OS::Heat::SoftwareConfig
@@ -99,7 +100,8 @@ resources:
       config_drive: True
       user_data_format: SOFTWARE_CONFIG
       user_data: { get_resource: master_init }
-      personality: { "/etc/ansible/hosts": { get_file: "hosts" } }
+      personality:
+        "/etc/ansible/hosts": { get_file: "hosts" }
 
   resource_group:
     type: OS::Heat::ResourceGroup
