@@ -55,16 +55,6 @@ resources:
             $ssh_key_1: { get_attr: [generated_key_pair, public_key] }
             $ssh_key_2: { get_attr: [generated_ansible_key_pair, public_key] }
 
-  install_ansible:
-    type: OS::Heat::SoftwareConfig
-    properties:
-      group: ungrouped
-      config:
-        str_replace:
-          template: { get_file: install_ansible }
-          params:
-            $ip: { get_attr: [master_port, fixed_ips, 0, ip_address] }
-
   install_etcd:
     type: OS::Heat::SoftwareConfig
     properties:
@@ -75,6 +65,26 @@ resources:
           params:
             wc_notify: { get_attr: [wait_handle, curl_cli] }
 
+  install_ansible:
+    type: OS::Heat::SoftwareConfig
+    properties:
+      group: ungrouped
+      config:
+        str_replace:
+          template: { get_file: install_ansible }
+          params:
+            $ip: { get_attr: [master_port, fixed_ips, 0, ip_address] }
+
+  install_ansible_private_key:
+    type: OS::Heat::SoftwareConfig
+    properties:
+      group: ungrouped
+      config:
+        str_replace:
+          template: { get_file: install_ansible_private_key }
+          params:
+            $key: { get_attr: [generated_ansible_key_pair, private_key] }
+
   master_init:
     type: OS::Heat::MultipartMime
     properties:
@@ -82,6 +92,7 @@ resources:
         - config: {get_resource: cloud_user }
         - config: {get_resource: install_etcd }
         - config: {get_resource: install_ansible }
+        - config: {get_resource: install_ansible_private_key }
 
   master_port:
     type: OS::Neutron::Port
