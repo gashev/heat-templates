@@ -1,0 +1,5 @@
+#!/bin/bash
+
+echo "$key" >/home/cloud/.ssh/id_rsa
+chown cloud.cloud /home/cloud/.ssh/id_rsa
+chmod 0400 /home/cloud/.ssh/id_rsa
