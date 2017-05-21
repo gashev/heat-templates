@@ -20,16 +20,6 @@ parameters:
     default: 3
 
 resources:
-  wait_condition:
-    type: OS::Heat::WaitCondition
-    properties:
-      handle: {get_resource: wait_handle}
-      count: 1
-      timeout: 300
-
-  wait_handle:
-    type: OS::Heat::WaitConditionHandle
-
   generated_key_pair:
     # http://docs.openstack.org/developer/heat/template_guide/openstack.html#OS::Nova::KeyPair
     type: OS::Nova::KeyPair
@@ -50,20 +40,10 @@ resources:
       group: ungrouped
       config:
         str_replace:
-          template: { get_file: user-data-master }
+          template: { get_file: user-data }
           params:
             $ssh_key_1: { get_attr: [generated_key_pair, public_key] }
             $ssh_key_2: { get_attr: [generated_ansible_key_pair, public_key] }
-
-  install_etcd:
-    type: OS::Heat::SoftwareConfig
-    properties:
-      group: ungrouped
-      config:
-        str_replace:
-          template: { get_file: install_etcd }
-          params:
-            wc_notify: { get_attr: [wait_handle, curl_cli] }
 
   install_ansible:
     type: OS::Heat::SoftwareConfig
@@ -85,12 +65,46 @@ resources:
           params:
             $key: { get_attr: [generated_ansible_key_pair, private_key] }
 
+  install_ansible_hosts_file_config:
+    type: OS::Heat::SoftwareConfig
+    properties:
+      group: script
+      inputs:
+        - name: master
+        - name: nodes
+      outputs:
+        - name: result
+      config: |
+        #!/usr/bin/python
+        import grp
+        import os
+        import pwd
+        f = open('/etc/ansible/hosts', 'w')
+        f.write("[master]\n%s\n\n" % (os.environ['master']))
+        f.write("[nodes]\n")
+        for node in eval(os.environ['nodes']):
+            f.write("%s\n" % (node))
+        f.close()
+        uid = pwd.getpwnam('cloud').pw_uid
+        gid = grp.getgrnam('cloud').gr_gid
+        os.chown('/etc/ansible/hosts', uid, gid)
+
+  install_ansible_hosts_file:
+    type: OS::Heat::SoftwareDeployment
+    properties:
+      config:
+        get_resource: install_ansible_hosts_file_config
+      server:
+        get_resource: master
+      input_values:
+        master: { get_attr: [master_port, fixed_ips, 0, ip_address] }
+        nodes: { get_attr: [resource_group, ip_list] }
+
   master_init:
     type: OS::Heat::MultipartMime
     properties:
       parts:
         - config: {get_resource: cloud_user }
-        - config: {get_resource: install_etcd }
         - config: {get_resource: install_ansible }
         - config: {get_resource: install_ansible_private_key }
 
@@ -111,12 +125,9 @@ resources:
       config_drive: True
       user_data_format: SOFTWARE_CONFIG
       user_data: { get_resource: master_init }
-      personality:
-        "/etc/ansible/hosts": { get_file: "hosts" }
 
   resource_group:
     type: OS::Heat::ResourceGroup
-    depends_on: wait_condition
     properties:
       count: { get_param: count }
       resource_def:

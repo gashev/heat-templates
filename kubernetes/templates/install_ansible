@@ -2,10 +2,3 @@
 
 packages:
   - ansible
-  - python2-python-etcd
-  - python-urllib3
-  - curl
-
-runcmd:
-  - chmod +x /etc/ansible/hosts
-  - curl -X PUT http://127.0.0.1:2379/v2/keys/ansible/masters/$(hostname) -d value="$ip"
