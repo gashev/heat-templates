@@ -1,0 +1,11 @@
+---
+- name: Install kubernetes package
+  yum: name={{ item }} state=present
+  with_items:
+   - kubernetes
+
+- name: Create /etc/kubernetes/config
+  template: src=config dest=/etc/kubernetes/config
+
+- name: Create /etc/kubernetes/apiserver
+  template: src=apiserver dest=/etc/kubernetes/apiserver

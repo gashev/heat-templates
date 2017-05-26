@@ -1,10 +1,13 @@
 ---
 - name: Masters installation
-  hosts: masters
+  hosts: master
   remote_user: cloud
   become: yes
   become_method: sudo
+  vars:
+    master: kubernetes-master-gumymvsfemnc
 
   roles:
+    - kubernetes
     - etcd
 
