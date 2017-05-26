@@ -65,13 +65,15 @@ resources:
           params:
             $key: { get_attr: [generated_ansible_key_pair, private_key] }
 
-  install_ansible_hosts_file_config:
+  software_config_ansible:
     type: OS::Heat::SoftwareConfig
     properties:
       group: script
       inputs:
         - name: master
+        - name: master_name
         - name: nodes
+        - name: node_names
       outputs:
         - name: result
       config: |
@@ -79,26 +81,43 @@ resources:
         import grp
         import os
         import pwd
+
+        master = os.environ['master']
+        master_name = os.environ['master_name']
+        nodes = eval(os.environ['nodes'])
+        node_names = eval(os.environ['node_names'])
+
+        # Configure /etc/ansible/hosts
         f = open('/etc/ansible/hosts', 'w')
-        f.write("[master]\n%s\n\n" % (os.environ['master']))
+        f.write("[master]\n%s\n\n" % (master))
         f.write("[nodes]\n")
-        for node in eval(os.environ['nodes']):
+        for node in nodes:
             f.write("%s\n" % (node))
         f.close()
         uid = pwd.getpwnam('cloud').pw_uid
         gid = grp.getgrnam('cloud').gr_gid
         os.chown('/etc/ansible/hosts', uid, gid)
 
-  install_ansible_hosts_file:
+        # Configure /etc/hosts
+        f = open('/etc/hosts', 'w')
+        f.write("127.0.0.1 localhost\n\n")
+        f.write("%s %s\n" % (master, master_name)) 
+        for key,value in enumerate(nodes):
+            f.write("%s %s\n" % (nodes[key], node_names[key]))
+        f.close() 
+
+  software_deployment_ansible:
     type: OS::Heat::SoftwareDeployment
     properties:
       config:
-        get_resource: install_ansible_hosts_file_config
+        get_resource: software_config_ansible
       server:
         get_resource: master
       input_values:
         master: { get_attr: [master_port, fixed_ips, 0, ip_address] }
+        master_name: { get_attr: [master, name] }
         nodes: { get_attr: [resource_group, ip_list] }
+        node_names: { get_attr: [resource_group, name_list] }
 
   master_init:
     type: OS::Heat::MultipartMime
