@@ -4,8 +4,6 @@
   remote_user: cloud
   become: yes
   become_method: sudo
-  vars:
-    master: {{ master }}
 
   roles:
     - kubernetes

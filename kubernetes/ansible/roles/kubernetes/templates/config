@@ -8,4 +8,4 @@ KUBE_LOG_LEVEL="--v=0"
 KUBE_ALLOW_PRIV="--allow-privileged=false"
 
 # How the replication controller and scheduler find the kube-apiserver
-KUBE_MASTER="--master=http://{{master}}:8080"
+KUBE_MASTER="--master=http://{{groups['master'][0]}}:8080"
