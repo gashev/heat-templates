@@ -144,6 +144,8 @@ resources:
       config_drive: True
       user_data_format: SOFTWARE_CONFIG
       user_data: { get_resource: master_init }
+      personality:
+        "/opt/ansible.tar.gz": { get_file: "ansible.tar.gz" }
 
   resource_group:
     type: OS::Heat::ResourceGroup
