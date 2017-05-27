@@ -5,7 +5,7 @@
   become: yes
   become_method: sudo
   vars:
-    master: kubernetes-master-gumymvsfemnc
+    master: {{ master }}
 
   roles:
     - kubernetes

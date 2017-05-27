@@ -79,8 +79,8 @@ resources:
       config: |
         #!/usr/bin/python
         import grp
-        import os
         import pwd
+        import os
 
         master = os.environ['master']
         master_name = os.environ['master_name']
@@ -105,6 +105,12 @@ resources:
         for key,value in enumerate(nodes):
             f.write("%s %s\n" % (nodes[key], node_names[key]))
         f.close() 
+
+        # Decode /opt/ansible.tar.gz from base64 and extract files.
+        os.system('base64 -d /opt/ansible.tar.gz >/opt/ansible-tmp.tar.gz')
+        os.remove('/opt/ansible.tar.gz')
+        os.system('tar xvvf /opt/ansible-tmp.tar.gz -C /opt')
+        os.remove('/opt/ansible-tmp.tar.gz')
 
   software_deployment_ansible:
     type: OS::Heat::SoftwareDeployment
@@ -145,7 +151,7 @@ resources:
       user_data_format: SOFTWARE_CONFIG
       user_data: { get_resource: master_init }
       personality:
-        "/opt/ansible.tar.gz": { get_file: "ansible.tar.gz" }
+        /opt/ansible.tar.gz: { get_file: "ansible.tar.gz" }
 
   resource_group:
     type: OS::Heat::ResourceGroup
