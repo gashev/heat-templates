@@ -9,3 +9,13 @@
 
 - name: Create /etc/kubernetes/apiserver
   template: src=apiserver dest=/etc/kubernetes/apiserver
+  notify: restart kube-apiserver
+
+- name: Start kube-apiserver Service
+  service: name=kube-apiserver state=started enabled=yes
+
+- name: Start kube-controller-manager Service
+  service: name=kube-controller-manager state=started enabled=yes
+
+- name: Start kube-scheduler Service
+  service: name=kube-scheduler state=started enabled=yes

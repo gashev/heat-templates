@@ -10,3 +10,20 @@
 
 - name: Start etcd Service
   service: name=etcd state=started enabled=yes
+
+- name: etcdctl create directory /kube-centos/network
+  shell: |
+    etcdctl ls /kube-centos/network 2>>/dev/null
+    if [ $? -ne 0 ]; then
+      etcdctl mkdir /kube-centos/network
+    fi
+    exit 0
+
+- name: configure network overlay configuration on master
+  shell: |
+    etcdctl ls etcdctl /kube-centos/network/config 2>>/dev/null
+    if [ $? -ne 0 ]; then
+      etcdctl mk /kube-centos/network/config "{ \"Network\": \"172.30.0.0/16\", \"SubnetLen\": 24, \"Backend\": { \"Type\": \"vxlan\" } }"
+    fi
+    exit 0
+

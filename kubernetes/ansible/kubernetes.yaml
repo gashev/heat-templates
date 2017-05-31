@@ -8,4 +8,5 @@
   roles:
     - kubernetes
     - etcd
+    - flannel
 
