@@ -1,0 +1,13 @@
+---
+- name: Install flannel package
+  yum: name={{ item }} state=present
+  with_items:
+   - flannel
+
+- name: Create /etc/sysconfig/flanneld
+  template: src=flanneld dest=/etc/sysconfig/flanneld
+  notify: restart flanneld
+
+- name: Start etcd Service
+  service: name=flanneld state=started enabled=yes
+
