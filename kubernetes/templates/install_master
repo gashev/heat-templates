@@ -33,3 +33,13 @@ os.remove('/opt/ansible.tar.gz')
 os.system('tar xvvf /opt/ansible-tmp.tar.gz -C /opt')
 os.remove('/opt/ansible-tmp.tar.gz')
 
+os.chown('/opt/ansible', uid, gid)
+
+# Create known_hosts file.
+os.system('ssh-keyscan %s >/home/cloud/.ssh/known_hosts' % (master))
+for node in nodes:
+    os.system('ssh-keyscan %s >>/home/cloud/.ssh/known_hosts' % (node))
+os.chown('/home/cloud/.ssh/known_hosts', uid, gid)
+
+# Run the ansible playbook.
+os.system('sudo su cloud -c "cd /opt/ansible; /usr/bin/ansible-playbook kubernetes.yaml"')
