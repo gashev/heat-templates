@@ -10,3 +10,14 @@
     - etcd
     - flannel
 
+- name: Nodes installation
+  hosts: nodes
+  remote_user: cloud
+  become: yes
+  become_method: sudo
+
+  roles:
+    - kubelet
+    - flannel
+    - docker
+

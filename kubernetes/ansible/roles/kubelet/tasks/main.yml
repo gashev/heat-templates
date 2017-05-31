@@ -1,0 +1,21 @@
+---
+- name: Install kubernetes package
+  yum: name={{ item }} state=present
+  with_items:
+   - kubernetes
+
+- name: Create /etc/kubernetes/kubelet
+  template: src=kubelet dest=/etc/kubernetes/kubelet
+  notify: restart kubelet
+
+- name: Start kubelet Service
+  service: name=kubelet state=started enabled=yes
+
+- name: Sets a cluster entry in kubeconfig
+  shell: "kubectl config set-cluster default-cluster --server=http://{{groups['master'][0]}}:8080"
+
+- name: Sets a context entry in kubeconfig
+  shell: "kubectl config set-context default-context --cluster=default-cluster --user=default-admin"
+
+- name: Sets the current-context in a kubeconfig file
+  shell: "kubectl config use-context default-context"
