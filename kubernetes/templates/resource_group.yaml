@@ -63,6 +63,3 @@ outputs:
   ip_list:
     description: The IP addresses of the deployed instance
     value: { get_attr: [port, fixed_ips, 0, ip_address] }
-  name_list:
-    description: The name of the deployed instance
-    value: { get_attr: [instance, name] }

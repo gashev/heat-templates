@@ -71,9 +71,7 @@ resources:
       group: script
       inputs:
         - name: master
-        - name: master_name
         - name: nodes
-        - name: node_names
       outputs:
         - name: result
       config: { get_file: "install_master" }
@@ -87,9 +85,7 @@ resources:
         get_resource: master
       input_values:
         master: { get_attr: [master_port, fixed_ips, 0, ip_address] }
-        master_name: { get_attr: [master, name] }
         nodes: { get_attr: [resource_group, ip_list] }
-        node_names: { get_attr: [resource_group, name_list] }
 
   master_init:
     type: OS::Heat::MultipartMime

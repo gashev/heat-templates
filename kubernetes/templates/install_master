@@ -4,9 +4,7 @@ import pwd
 import os
 
 master = os.environ['master']
-master_name = os.environ['master_name']
 nodes = eval(os.environ['nodes'])
-node_names = eval(os.environ['node_names'])
 
 # Configure /etc/ansible/hosts
 f = open('/etc/ansible/hosts', 'w')
@@ -18,14 +16,6 @@ f.close()
 uid = pwd.getpwnam('cloud').pw_uid
 gid = grp.getgrnam('cloud').gr_gid
 os.chown('/etc/ansible/hosts', uid, gid)
-
-# Configure /etc/hosts
-f = open('/etc/hosts', 'w')
-f.write("127.0.0.1 localhost\n\n")
-f.write("%s %s\n" % (master, master_name)) 
-for key,value in enumerate(nodes):
-    f.write("%s %s\n" % (nodes[key], node_names[key]))
-f.close() 
 
 # Decode /opt/ansible.tar.gz from base64 and extract files.
 os.system('base64 -d /opt/ansible.tar.gz >/opt/ansible-tmp.tar.gz')
