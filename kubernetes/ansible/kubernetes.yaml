@@ -1,4 +1,11 @@
 ---
+- hosts: all
+  gather_facts: false
+  tasks:
+    - name: Get hostname
+      command: hostnamectl --static
+      register: hostname
+
 - name: Masters installation
   hosts: master
   remote_user: cloud
@@ -6,6 +13,7 @@
   become_method: sudo
 
   roles:
+    - hosts
     - kubernetes
     - etcd
     - flannel
