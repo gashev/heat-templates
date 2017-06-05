@@ -6,7 +6,7 @@ import os
 master = os.environ['master']
 nodes = eval(os.environ['nodes'])
 
-# Configure /etc/ansible/hosts
+# Configure /etc/ansible/hosts.
 f = open('/etc/ansible/hosts', 'w')
 f.write("[master]\n%s\n\n" % (master))
 f.write("[nodes]\n")
@@ -22,8 +22,7 @@ os.system('base64 -d /opt/ansible.tar.gz >/opt/ansible-tmp.tar.gz')
 os.remove('/opt/ansible.tar.gz')
 os.system('tar xvvf /opt/ansible-tmp.tar.gz -C /opt')
 os.remove('/opt/ansible-tmp.tar.gz')
-
-os.chown('/opt/ansible', uid, gid)
+os.system('chown -R cloud.cloud /opt/ansible')
 
 # Create known_hosts file.
 os.system('ssh-keyscan %s >/home/cloud/.ssh/known_hosts' % (master))
