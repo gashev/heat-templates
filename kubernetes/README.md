@@ -27,7 +27,7 @@ You can ssh into instances as the `cloud` user:
 $ ssh cloud@192.168.0.30 -i private_key
 ```
 
-Heat create one master and nodes, upload ansible playbooks to the master instance in `/opt/ansible` directory and exec `ansible-playbook for kubernetes installation.
+Heat create one master and nodes, upload ansible playbooks to the master instance in `/opt/ansible` directory and exec `ansible-playbook` for kubernetes installation.
 
 ## Delete stack and cleanup
 
