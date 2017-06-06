@@ -29,10 +29,10 @@ You can ssh into instances as the `cloud` user:
 
 ## Delete stack and cleanup
 
-For delete and cleanup procedure exec
+For delete and cleanup procedure exec:
 
     ```bash
     $ make delete
     ```
 
-Stack will deleted and temporary files will removed.
+Cleanup will remove stack kubernetes and will remove temporary files.
