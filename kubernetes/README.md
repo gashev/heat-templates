@@ -20,14 +20,14 @@ parameters:
   count: 3
 ```
 
-2. Exec make. Make archive ansible folder; create new stack with name kubernetes; create private_key - private key file for access to instances.
+2. Exec make. Make create new stack with name kubernetes; create private_key - private key file for access to instances, ansible_private_key - private key file for ssh access from master to nodes. Heat create one master and nodes, upload ansible playbooks to the master instance in `/opt/ansible` directory and exec `ansible-playbook` for kubernetes installation.
+
 You can ssh into instances as the `cloud` user:
 
 ```
 $ ssh cloud@192.168.0.30 -i private_key
 ```
 
-Heat create one master and nodes, upload ansible playbooks to the master instance in `/opt/ansible` directory and exec `ansible-playbook` for kubernetes installation.
 
 ## Delete stack and cleanup
 
