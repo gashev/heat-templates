@@ -23,7 +23,9 @@ Guest image - use [script][../image] to build CentOS 7 image. Script use [diskim
 2. Exec make. Make archive ansible folder; create new stack with name kubernetes; create private_key - private key file for access to instances.
 You can ssh into instances as the `cloud` user:
 
+    ```bash
     $ ssh cloud@192.168.0.30 -i private_key
+    ```
 
 ## Delete stack and cleanup.
 
