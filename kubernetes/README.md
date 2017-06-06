@@ -5,11 +5,11 @@ Deploying Kubernetes with Heat
 
 OpenStack Mitaka version.
 
-Guest image - use [script][../image] to build CentOS 7 image. Script use [diskimage-builder][https://docs.openstack.org/developer/diskimage-builder/].
+Guest image - use [script](../image) to build CentOS 7 image. Script use [diskimage-builder](https://docs.openstack.org/developer/diskimage-builder/).
 
 ## Creating the stack
 
-1. Update [env.yaml][env.yaml] environment file:
+1. Update [env.yaml](env.yaml) environment file:
 
     ```yaml
     parameters:
