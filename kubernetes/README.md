@@ -27,6 +27,12 @@ You can ssh into instances as the `cloud` user:
     $ ssh cloud@192.168.0.30 -i private_key
     ```
 
-## Delete stack and cleanup.
+## Delete stack and cleanup
 
-For delete and cleanup procedure exec `make delete`: stack will deleted and temporary files will removed.
+For delete and cleanup procedure exec
+
+    ```bash
+    $ make delete
+    ```
+
+Stack will deleted and temporary files will removed.
