@@ -1,5 +1,5 @@
-Deploying Kubernetes with Heat
-==============================
+Deploying Kubernetes with Heat and Ansible
+==========================================
 
 ## Requirements
 
