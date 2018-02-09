@@ -7,6 +7,7 @@ git clone https://git.openstack.org/openstack/diskimage-builder.git
 git clone https://git.openstack.org/openstack/heat-agents.git
 git clone https://git.openstack.org/openstack/tripleo-image-elements.git
 
+pip install pep8 pytz
 pip install diskimage-builder
 
 export ELEMENTS_PATH="elements:tripleo-image-elements/elements:heat-agents/:diskimage-builder/diskimage_builder/elements"
